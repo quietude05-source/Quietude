@@ -723,3 +723,38 @@ if ('serviceWorker' in navigator) {
             .catch(err => console.error('Service Worker registration failed: ', err));
     });
 }
+
+let deferredPrompt;
+const installBtn = document.getElementById('installAppBtn');
+
+// Listen for the browser's signal that the app can be installed
+window.addEventListener('beforeinstallprompt', (e) => {
+  // Prevent Chrome's default automated pop-up from appearing
+  e.preventDefault();
+  // Save the event so it can be triggered later
+  deferredPrompt = e;
+  // Make your custom install button visible on the screen
+  installBtn.style.display = 'block';
+});
+
+// What happens when the user clicks your custom button
+installBtn.addEventListener('click', async () => {
+  if (deferredPrompt !== null) {
+    // Show the native Chrome install prompt
+    deferredPrompt.prompt();
+    
+    // Wait for the user to say "Yes" or "Cancel"
+    const { outcome } = await deferredPrompt.userChoice;
+    
+    // The prompt can only be used once, so clear it
+    deferredPrompt = null;
+    // Hide the button again
+    installBtn.style.display = 'none';
+  }
+});
+
+// Optional: Hide the button completely if the app is already installed successfully
+window.addEventListener('appinstalled', () => {
+  installBtn.style.display = 'none';
+  deferredPrompt = null;
+});
