@@ -754,7 +754,16 @@ installBtn.addEventListener('click', async () => {
 });
 
 // Optional: Hide the button completely if the app is already installed successfully
-window.addEventListener('appinstalled', () => {
-  installBtn.style.display = 'none';
-  deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+    // 1. Prevent the event if we are already running as an installed app
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+        return;
+    }
+    
+    // 2. Otherwise, proceed as normal
+    e.preventDefault();
+    deferredPrompt = e;
+    if (installBtn) {
+        installBtn.style.display = 'inline-flex';
+    }
 });
